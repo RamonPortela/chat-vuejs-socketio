@@ -5,6 +5,7 @@ var io = require('socket.io')(http);
 
 io.on('connection', (socket) => {
     console.log('um usuário se conectou');
+    console.log(socket.rooms);
     socket.emit('conectado', socket.id);
     socket.on('disconnect', () =>{
         console.log('um usuario desconectou');
