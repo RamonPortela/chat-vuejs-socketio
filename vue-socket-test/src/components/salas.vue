@@ -1,12 +1,12 @@
 <template>
     <div class="holder borda-arredondada">
         <div class="col-xs-12 borda-arredondada salas">
-            <div>
+            <div class="header">
                 <h2>Salas</h2>
             </div>
             <div style="height: calc(100% - 63px); overflow-y: auto; width: 100%">
                 <ul v-if="salas.length > 0" class="menu">
-                    <li v-for="sala in salas" @click="selecionarSala(sala)" class="sala">{{sala}}</li>
+                    <li v-for="(sala, index) in salas" @click="selecionarSala(sala, index)" class="sala" :class="{ativo: salaSelecionada === index}">{{sala}}</li>
                 </ul>
                 <p v-else>crie uma sala abaixo</p>
             </div>
@@ -23,6 +23,7 @@
     export default{
         data(){
             return{
+                salaSelecionada: -1,
                 salas: [],
                 nomeSala: ''
             }
@@ -34,6 +35,9 @@
             salaCriada(data){
                 this.salas.push(data);
             },
+            entrarEmSala(data){
+                this.mensagens = data.mensagens;
+            }
 
         },
         methods:{
@@ -43,7 +47,9 @@
                 this.$socket.emit('criarSala', this.nomeSala);
                 this.nomeSala = '';
             },
-            selecionarSala(sala){
+            selecionarSala(sala, index){
+                this.salaSelecionada = index;
+                this.$socket.emit('entrarEmSala', sala);
                 this.$emit('selecionarSala', sala);
             }
         }
@@ -52,6 +58,12 @@
 <style scoped>
     .menu{
         padding: 0px;
+        text-align: center;
+    }
+
+    .header{
+        margin-right: auto;
+        margin-left: auto;
     }
 
     .salas{
@@ -63,7 +75,7 @@
         border-top: 0;
         border-left: 0;
         border-radius: 10px 0 0 0;
-        padding-right: 0;
+        padding: 0;
 
     }
 
@@ -78,7 +90,12 @@
     }
     .sala:hover{
         cursor: pointer;
+        background-color: lightgrey;
+    }
+
+    .ativo{
         background-color: aliceblue;
+        font-weight: bold;
     }
 
     .holder{

@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="salaConectada !== undefined">
       <div class="col-md-12">
         <form>
           <div class="input-group">
@@ -55,8 +55,6 @@ export default {
           this.chatId = data[0];
       },
       entrarEmSala(data){
-          console.log(data);
-          this.salaConectada = data.sala;
           this.mensagens = data.mensagens;
       },
       salaJaExiste(){
@@ -71,7 +69,7 @@ export default {
           this.mensagem = '';
       },
       selecionarSala(sala){
-          this.$socket.emit('entrarEmSala', sala);
+          this.salaConectada = sala;
       }
   }
 }
