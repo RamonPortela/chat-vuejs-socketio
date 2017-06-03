@@ -2,17 +2,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <div class="col-xs-3 borda-arredondada salas">
-          <div>
-            <ul>
-              <li>sala</li>
-            </ul>
-          </div>
-          <div id="div-btn-adicionar">
-            <input type="text" class="form-control" placeholder="Criar uma sala...">
-            <button class="btn btn-outline-success">+</button>
-          </div>
-        </div>
+        <salas @selecionarSala="selecionarSala"></salas>
         <div class="col-xs-9 mensagens borda-arredondada">
           <div v-for="m in mensagens" :class="{mensagem: true, direita: m.idRemetente === chatId, esquerda: m.idRemetente !== chatId}">{{m.mensagem}}</div>
         </div>
@@ -35,13 +25,20 @@
 </template>
 
 <script>
+import salas from './components/salas.vue'
+
 export default {
   name: 'app',
+  components: {
+    'salas': salas
+  },
   data () {
     return {
       chatId: '',
+      salaConectada: undefined,
       mensagem: '',
-      mensagens: []
+      mensagens: [],
+
     }
   },
     sockets:{
@@ -50,19 +47,31 @@ export default {
       disconnect() {
       },
       enviarMensagem(data) {
-          this.mensagens.push(data);
+          console.log(data);
+          if(data.sala === this.salaConectada)
+            this.mensagens.push(data);
       },
       conectado(data){
-          this.chatId = data;
+          this.chatId = data[0];
+      },
+      entrarEmSala(data){
           console.log(data);
+          this.salaConectada = data.sala;
+          this.mensagens = data.mensagens;
+      },
+      salaJaExiste(){
+          alert("Sala já criada!");
       }
   },
   methods: {
       enviarMensagem(){
           if(this.mensagem === '')
               return;
-          this.$socket.emit('mensagemEnviada', { mensagem: this.mensagem, idRemetente: this.chatId });
+          this.$socket.emit('mensagemEnviada', { mensagem: this.mensagem, idRemetente: this.chatId, sala: this.salaConectada });
           this.mensagem = '';
+      },
+      selecionarSala(sala){
+          this.$socket.emit('entrarEmSala', sala);
       }
   }
 }
@@ -88,15 +97,6 @@ export default {
     display: flex;
     flex-direction: column;
     border-radius: 0;
-  }
-
-  .salas{
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 600px;
-    border-right: 0;
-    border-radius: 10px 0 0 0;
   }
 
   .mensagem{
@@ -156,12 +156,6 @@ export default {
     width: calc(100% - 30px);
     position: absolute;
     bottom: 5px;
-  }
-
-  #div-btn-adicionar > input{
-    width: 70%;
-    margin-right: 5px;
-    float: left;
   }
 
   .btn-outline-success {
